@@ -30,7 +30,7 @@ module.exports.passportJwtSecret = (options) => {
       return cb(null, null);
     }
 
-    client.getSigningKey(decoded.header.kid, (err, key) => {
+    client.getSigningKey(decoded, (err, key) => {
       if (err) {
         return onError(err, (newError) => cb(newError, null));
       }

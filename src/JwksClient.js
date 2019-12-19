@@ -33,11 +33,14 @@ export class JwksClient {
     }
   }
 
-  getKeys(cb) {
-    this.logger(`Fetching keys from '${this.options.jwksUri}'`);
+  getKeys(token, cb) {
+    const uri = this.options.jwksUri instanceof Function
+      ? this.options.jwksUri(token)
+      : this.options.jwksUri;
+    this.logger(`Fetching keys from '${uri}'`);
     request({
+      uri,
       json: true,
-      uri: this.options.jwksUri,
       strictSSL: this.options.strictSsl,
       headers: this.options.requestHeaders,
       agentOptions: this.options.requestAgentOptions
@@ -55,8 +58,8 @@ export class JwksClient {
     });
   }
 
-  getSigningKeys(cb) {
-    this.getKeys((err, keys) => {
+  getSigningKeys(token, cb) {
+    this.getKeys(token, (err, keys) => {
       if (err) {
         return cb(err);
       }
@@ -92,10 +95,12 @@ export class JwksClient {
     });
   }
 
-  getSigningKey = (kid, cb) => {
+  getSigningKey = (token, cb) => {
+    const kid = token.header.kid;
+
     this.logger(`Fetching signing key for '${kid}'`);
 
-    this.getSigningKeys((err, keys) => {
+    this.getSigningKeys(token, (err, keys) => {
       if (err) {
         return cb(err);
       }
